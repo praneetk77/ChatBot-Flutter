@@ -1,4 +1,6 @@
+import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dialogflow/dialogflow_v2.dart';
 import 'package:intl/intl.dart';
 
 void main() {
@@ -16,31 +18,39 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   final messageController = TextEditingController();
+  List<Map> messages = [];
+
+  void response(query) async {
+    print("Function started");
+    AuthGoogle authGoogle = await AuthGoogle(
+      fileJson: "assets/chat-bot-322910-b375b430aa6c.json",
+    ).build();
+    print("AuthGoogle built");
+    Dialogflow dialogflow =
+        Dialogflow(authGoogle: authGoogle, language: Language.english);
+    print("DialogFlow built");
+    AIResponse aiResponse = await dialogflow.detectIntent(query);
+    print("AIResponse built");
+    setState(() {
+      messages.insert(0, {
+        "data": 0,
+        "messages": aiResponse.getListMessage()[0]["text"]["text"][0].toString()
+      });
+    });
+    print("state set");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +74,10 @@ class _MyHomePageState extends State<MyHomePage> {
             Flexible(
               child: ListView.builder(
                 reverse: true,
-                itemCount: 0,
-                itemBuilder: (context, index) {},
+                itemCount: messages.length,
+                itemBuilder: (context, index) => chat(
+                    messages[index]["message"].toString(),
+                    messages[index]["data"]),
               ),
             ),
             Divider(
@@ -113,16 +125,87 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () {
                     if (messageController.text.isEmpty)
                       print("Empty message");
-                    else
+                    else {
                       setState(() {
-                        //TODO : Karo isko
+                        messages.insert(
+                            0, {"data": 1, "message": messageController.text});
                       });
+                      print(messages[0]);
+                      response(messageController.text);
+                      print(messages[0]);
+                      messageController.clear();
+                    }
+                    FocusScopeNode currentFocus = FocusScope.of(context);
+                    if (!currentFocus.hasPrimaryFocus) {
+                      currentFocus.unfocus();
+                    }
                   },
                 ),
               ),
             )
           ],
         ),
+      ),
+    );
+  }
+
+  Widget chat(String message, int data) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment:
+            data == 1 ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          data == 0
+              ? Container(
+                  height: 60,
+                  width: 60,
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage("assets/robot.png"),
+                  ),
+                )
+              : Container(),
+          Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Bubble(
+              radius: Radius.circular(15.0),
+              color: data == 0
+                  ? Color.fromRGBO(23, 157, 139, 1)
+                  : Colors.orangeAccent,
+              elevation: 0.0,
+              child: Padding(
+                padding: EdgeInsets.all(2.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    SizedBox(
+                      width: 10.0,
+                    ),
+                    Flexible(
+                      child: Container(
+                        constraints: BoxConstraints(maxWidth: 200),
+                        child: Text(
+                          message,
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          data == 1
+              ? Container(
+                  height: 60,
+                  width: 60,
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage("assets/default.jpg"),
+                  ),
+                )
+              : Container()
+        ],
       ),
     );
   }

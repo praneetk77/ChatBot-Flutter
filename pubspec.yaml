@@ -43,7 +43,7 @@ dev_dependencies:
 flutter:
 
   assets:
-    - assets/services.json
+    - assets/chat-bot-322910-b375b430aa6c.json
     - assets/default.jpg
     - assets/robot.jpg
 
