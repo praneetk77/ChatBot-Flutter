@@ -40,9 +40,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final messageController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       appBar: AppBar(
         title: Text("Chat Bot"),
@@ -57,6 +58,66 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text(
                   "Today, ${DateFormat("Hm").format(DateTime.now())}",
                   style: TextStyle(fontSize: 20),
+                ),
+              ),
+            ),
+            Flexible(
+              child: ListView.builder(
+                reverse: true,
+                itemCount: 0,
+                itemBuilder: (context, index) {},
+              ),
+            ),
+            Divider(
+              height: 5,
+              color: Colors.greenAccent,
+            ),
+            Container(
+              child: ListTile(
+                leading: IconButton(
+                  icon: Icon(
+                    Icons.camera_alt,
+                    color: Colors.greenAccent,
+                    size: 35,
+                  ),
+                ),
+                title: Container(
+                  height: 35,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(15),
+                    ),
+                    color: Color.fromRGBO(220, 220, 220, 1),
+                  ),
+                  padding: EdgeInsets.only(left: 15),
+                  child: TextFormField(
+                    controller: messageController,
+                    decoration: InputDecoration(
+                      hintText: "Enter a message.",
+                      hintStyle: TextStyle(color: Colors.black26),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                    ),
+                    style: TextStyle(color: Colors.black, fontSize: 16),
+                  ),
+                ),
+                trailing: IconButton(
+                  icon: Icon(
+                    Icons.send,
+                    size: 30,
+                    color: Colors.greenAccent,
+                  ),
+                  onPressed: () {
+                    if (messageController.text.isEmpty)
+                      print("Empty message");
+                    else
+                      setState(() {
+                        //TODO : Karo isko
+                      });
+                  },
                 ),
               ),
             )
